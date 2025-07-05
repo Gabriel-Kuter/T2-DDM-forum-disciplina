@@ -1,5 +1,10 @@
 ### AndroidStudio template
 # Covers files to be ignored for android development using Android Studio.
+# Firebase - Ignorar arquivos de configuração sensíveis
+/bora_la/android/app/google-services.json
+/bora_la/ios/Runner/GoogleService-Info.plist
+/bora_la/lib/firebase_options.dart
+/bora_la/firebase.json
 
 # Built application files
 *.apk

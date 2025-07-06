@@ -17,6 +17,7 @@ class AuthProvider with ChangeNotifier {
 
   AuthStatus _status = AuthStatus.uninitialized;
   UserModel? _userModel;
+  String? _errorMessage;
 
   // Construtor
   AuthProvider(this._authService, this._firestoreService) {
@@ -25,6 +26,7 @@ class AuthProvider with ChangeNotifier {
 
   AuthStatus get status => _status;
   UserModel? get user => _userModel;
+  String? get errorMessage => _errorMessage;
 
   Future<void> _onAuthStateChanged(User? firebaseUser) async {
     if (firebaseUser == null) {
@@ -40,7 +42,9 @@ class AuthProvider with ChangeNotifier {
   Future<bool> signIn(String email, String password) async {
     try {
       _status = AuthStatus.authenticating;
+      _errorMessage = null;
       notifyListeners();
+
       final result = await _authService.signInWithEmailAndPassword(
         email: email,
         password: password,
@@ -48,8 +52,69 @@ class AuthProvider with ChangeNotifier {
       return result != null;
     } catch (e) {
       _status = AuthStatus.unauthenticated;
+      _errorMessage = 'Erro ao fazer login. Verifique suas credenciais.';
       notifyListeners();
       return false;
+    }
+  }
+
+  Future<bool> signUp({
+    required String email,
+    required String password,
+    required String matricula, // CPF
+    String? nickname,
+  }) async {
+    try {
+      _status = AuthStatus.authenticating;
+      _errorMessage = null;
+      notifyListeners();
+
+      // Validar matrícula com cpf e email
+      final enrollmentData = await _validateEnrollment(matricula, email);
+      if (enrollmentData == null) {
+        _status = AuthStatus.unauthenticated;
+        _errorMessage = 'CPF e email não encontrados ou não coincidem. Verifique os dados.';
+        notifyListeners();
+        return false;
+      }
+
+      // Criar Firebase Auth user
+      final result = await _authService.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      if (result != null) {
+        // Criar user document no Firestore usando dados da matrícula
+        final userModel = UserModel(
+          uid: result.user!.uid,
+          email: email,
+          nome: enrollmentData['nome'],
+          nickname: nickname,
+          avatarUrl: null,
+          role: enrollmentData['role'],
+          matricula: matricula,
+        );
+
+        await _firestoreService.setUserData(userModel);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      _status = AuthStatus.unauthenticated;
+      _errorMessage = 'Erro ao criar conta. Tente novamente.';
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<Map<String, dynamic>?> _validateEnrollment(String cpf, String email) async {
+    try {
+      final enrollmentData = await _firestoreService.validateEnrollment(cpf, email);
+      return enrollmentData;
+    } catch (e) {
+      print('Erro ao validar matrícula: $e');
+      return null;
     }
   }
 
@@ -57,8 +122,12 @@ class AuthProvider with ChangeNotifier {
     await _authService.signOut();
     _status = AuthStatus.unauthenticated;
     _userModel = null;
+    _errorMessage = null;
     notifyListeners();
   }
 
-  //TODO Implementar função de cadastro (signUp)
+  void clearError() {
+    _errorMessage = null;
+    notifyListeners();
+  }
 }

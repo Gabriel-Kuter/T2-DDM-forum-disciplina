@@ -82,4 +82,21 @@ class FirestoreService {
       }).toList();
     });
   }
+
+  Future<Map<String, dynamic>?> validateEnrollment(String cpf, String email) async {
+    try {
+      final doc = await _db.collection('enrollments').doc(cpf).get();
+
+      if (doc.exists && doc.data()?['ativo'] == true) {
+        final enrollmentData = doc.data()!;
+
+        if (enrollmentData['email']?.toString().toLowerCase() == email.toLowerCase()) {
+          return enrollmentData;
+        }
+      }
+    } catch (e) {
+      print('Erro ao validar matrícula: $e');
+    }
+    return null;
+  }
 }

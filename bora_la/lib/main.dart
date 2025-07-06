@@ -3,16 +3,23 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 
 import 'core/providers/auth_provider.dart';
+import 'core/providers/topics_provider.dart';
+import 'core/providers/announcement_provider.dart';
 import 'core/services/auth_service.dart';
 import 'core/services/firestore_service.dart';
+import 'core/services/auto_seed_service.dart';
 
-//importação das configs do projeto do firebase
+import 'ui/screens/auth/login_screen.dart';
+
 import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  final autoSeedService = AutoSeedService(); // Popula dados iniciais automaticamente se o banco estiver vazio
+  await autoSeedService.ensureInitialData(); // Em produção a integração viria do SIGA/Moodle
 
   runApp(const MyApp());
 }
@@ -30,13 +37,23 @@ class MyApp extends StatelessWidget {
         Provider(create: (_) => FirestoreService()),
 
         ChangeNotifierProvider(
-          create:
-              (context) => AuthProvider(
-                context.read<AuthService>(),
-                context.read<FirestoreService>(),
-              ),
+          create: (context) => AuthProvider(
+            context.read<AuthService>(),
+            context.read<FirestoreService>(),
+          ),
         ),
-        // Adicionar outros providers aqui mais tarde (Topics, Announcements)
+
+        ChangeNotifierProvider(
+          create: (context) => TopicsProvider(
+            context.read<FirestoreService>(),
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => AnnouncementsProvider(
+            context.read<FirestoreService>(),
+          ),
+        ),
+        // Adicionar outros providers aqui
       ],
       child: MaterialApp(
         title: 'Fórum 65DDM',
@@ -58,27 +75,35 @@ class AuthWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
 
+    print('🔍 Auth status: ${authProvider.status}');
+    print('🔍 User: ${authProvider.user?.email ?? 'null'}');
+
     switch (authProvider.status) {
       case AuthStatus.authenticated:
+        print('✅ Showing HomeScreen');
         return const HomeScreen();
       case AuthStatus.unauthenticated:
+        print('📝 Showing LoginScreen');
         return const LoginScreen();
       default:
-        return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        print('⏳ Showing Loading');
+        return const Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('Carregando...', style: TextStyle(fontSize: 16)),
+              ],
+            ),
+          ),
+        );
     }
   }
 }
 
-// --- TELAS DE TESTE  ---
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: Text('Tela de Login')));
-  }
-}
-
+// --- TELA DE TESTE  ---
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 

@@ -12,6 +12,7 @@ import 'core/services/auto_seed_service.dart';
 
 import 'ui/screens/auth/login_screen.dart';
 import 'ui/screens/home/home_screen.dart';
+import 'ui/screens/splash/splash_screen.dart';
 
 import 'firebase_options.dart';
 
@@ -61,7 +62,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Fórum 65DDM',
         theme: AppConstants.lightTheme,
-        home: const AuthWrapper(),
+        home: const SplashScreen(),
       ),
     );
   }

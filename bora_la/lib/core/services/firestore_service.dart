@@ -1,0 +1,143 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/user_model.dart';
+import '../models/topic_model.dart';
+import '../models/announcement_model.dart';
+import '../models/comment_model.dart';
+
+class FirestoreService {
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+
+  Future<void> setUserData(UserModel user) async {
+    try {
+      await _db.collection('users').doc(user.uid).set(user.toJson());
+    } catch (e) {
+      print('Erro ao salvar usuário: $e');
+    }
+  }
+
+  Future<UserModel?> getUserData(String uid) async {
+    try {
+      final doc = await _db.collection('users').doc(uid).get();
+      if (doc.exists) {
+        return UserModel.fromJson(doc.data()!);
+      }
+    } catch (e) {
+      print('Erro ao buscar usuário: $e');
+    }
+    return null;
+  }
+
+  // Stream atualiza a lista automaticamente quando há mudanças.
+  Stream<List<TopicModel>> getTopics() {
+    return _db.collection('topics').snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) {
+        return TopicModel.fromJson(doc.data(), doc.id);
+      }).toList();
+    });
+  }
+
+  Future<void> updateTopic(String topicId, Map<String, dynamic> data) async {
+    try {
+      await _db.collection('topics').doc(topicId).update(data);
+    } catch (e) {
+      print('Erro ao atualizar tópico: $e');
+    }
+  }
+
+
+  Stream<List<AnnouncementModel>> getAnnouncements() {
+    return _db
+        .collection('announcements')
+        .orderBy('dataCriacao', descending: true)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) {
+        return AnnouncementModel.fromJson(doc.data(), doc.id);
+      }).toList();
+    });
+  }
+
+  Future<void> addComment(String announcementId, CommentModel comment) async {
+    try {
+      await _db
+          .collection('announcements')
+          .doc(announcementId)
+          .collection('comments')
+          .add(comment.toJson());
+    } catch (e) {
+      print('Erro ao adicionar comentário: $e');
+    }
+  }
+
+  Stream<List<CommentModel>> getComments(String announcementId) {
+    return _db
+        .collection('announcements')
+        .doc(announcementId)
+        .collection('comments')
+        .orderBy('createdAt', descending: false)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) {
+        return CommentModel.fromJson(doc.data(), doc.id);
+      }).toList();
+    });
+  }
+
+  Future<Map<String, dynamic>?> validateEnrollment(String cpf, String email) async {
+    try {
+      final doc = await _db.collection('enrollments').doc(cpf).get();
+
+      if (doc.exists && doc.data()?['ativo'] == true) {
+        final enrollmentData = doc.data()!;
+
+        if (enrollmentData['email']?.toString().toLowerCase() == email.toLowerCase()) {
+          return enrollmentData;
+        }
+      }
+    } catch (e) {
+      print('Erro ao validar matrícula: $e');
+    }
+    return null;
+  }
+
+  Future<void> deleteComment(String announcementId, String commentId) async {
+    try {
+      await _db
+          .collection('announcements')
+          .doc(announcementId)
+          .collection('comments')
+          .doc(commentId)
+          .delete();
+    } catch (e) {
+      print('Erro ao apagar comentário: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> deleteAnnouncement(String announcementId) async {
+    try {
+      await _db.collection('announcements').doc(announcementId).delete();
+    } catch (e) {
+      print('Erro ao apagar anúncio: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> createAnnouncement(Map<String, dynamic> data) async {
+    try {
+      await _db.collection('announcements').add(data);
+    } catch (e) {
+      print('Erro ao criar anúncio: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> updateAnnouncement(String id, Map<String, dynamic> data) async {
+    try {
+      await _db.collection('announcements').doc(id).update(data);
+    } catch (e) {
+      print('Erro ao atualizar anúncio: $e');
+      rethrow;
+    }
+  }
+}

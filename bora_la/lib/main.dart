@@ -1,3 +1,4 @@
+import 'package:bora_la/core/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
@@ -19,8 +20,10 @@ void main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  final autoSeedService = AutoSeedService(); // Popula dados iniciais automaticamente se o banco estiver vazio
-  await autoSeedService.ensureInitialData(); // Em produção a integração viria do SIGA/Moodle
+  final autoSeedService =
+      AutoSeedService(); // Popula dados iniciais automaticamente se o banco estiver vazio
+  await autoSeedService
+      .ensureInitialData(); // Em produção a integração viria do SIGA/Moodle
 
   runApp(const MyApp());
 }
@@ -38,30 +41,26 @@ class MyApp extends StatelessWidget {
         Provider(create: (_) => FirestoreService()),
 
         ChangeNotifierProvider(
-          create: (context) => AuthProvider(
-            context.read<AuthService>(),
-            context.read<FirestoreService>(),
-          ),
+          create:
+              (context) => AuthProvider(
+                context.read<AuthService>(),
+                context.read<FirestoreService>(),
+              ),
         ),
 
         ChangeNotifierProvider(
-          create: (context) => TopicsProvider(
-            context.read<FirestoreService>(),
-          ),
+          create: (context) => TopicsProvider(context.read<FirestoreService>()),
         ),
 
         ChangeNotifierProvider(
-          create: (context) => AnnouncementsProvider(
-            context.read<FirestoreService>(),
-          ),
+          create:
+              (context) =>
+                  AnnouncementsProvider(context.read<FirestoreService>()),
         ),
       ],
       child: MaterialApp(
         title: 'Fórum 65DDM',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-        ),
+        theme: AppConstants.lightTheme,
         home: const AuthWrapper(),
       ),
     );
@@ -89,7 +88,7 @@ class AuthWrapper extends StatelessWidget {
               children: [
                 CircularProgressIndicator(),
                 SizedBox(height: 16),
-                Text('Carregando...', style: TextStyle(fontSize: 16)),
+                Text('Carregando...'),
               ],
             ),
           ),

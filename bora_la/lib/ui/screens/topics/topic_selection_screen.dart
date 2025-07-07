@@ -22,7 +22,9 @@ class _TopicSelectionScreenState extends State<TopicSelectionScreen> {
     if (user == null) return;
 
     if (topicsProvider.hasUserChosenTopic(user.uid)) {
-      _showErrorSnackBar('Você já escolheu um tema. Desmarque o atual para escolher outro.');
+      _showErrorSnackBar(
+        'Você já escolheu um tema. Desmarque o atual para escolher outro.',
+      );
       return;
     }
 
@@ -38,7 +40,9 @@ class _TopicSelectionScreenState extends State<TopicSelectionScreen> {
         _isAvailableExpanded = false;
       });
     } else if (mounted) {
-      _showErrorSnackBar(topicsProvider.errorMessage ?? 'Erro ao escolher tema.');
+      _showErrorSnackBar(
+        topicsProvider.errorMessage ?? 'Erro ao escolher tema.',
+      );
     }
   }
 
@@ -56,24 +60,30 @@ class _TopicSelectionScreenState extends State<TopicSelectionScreen> {
         _isAvailableExpanded = true;
       });
     } else if (mounted) {
-      _showErrorSnackBar(topicsProvider.errorMessage ?? 'Erro ao desmarcar tema.');
+      _showErrorSnackBar(
+        topicsProvider.errorMessage ?? 'Erro ao desmarcar tema.',
+      );
     }
   }
 
   void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(message),
-      backgroundColor: AppConstants.errorColor,
-      behavior: SnackBarBehavior.floating,
-    ));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppConstants.errorColor,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   void _showSuccessSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(message),
-      backgroundColor: AppConstants.successColor,
-      behavior: SnackBarBehavior.floating,
-    ));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppConstants.successColor,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   @override
@@ -86,42 +96,39 @@ class _TopicSelectionScreenState extends State<TopicSelectionScreen> {
 
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
-      appBar: AppBar(
-        title: const Text('Escolha de Temas'),
-        backgroundColor: AppConstants.primaryColor,
-        foregroundColor: Colors.white,
-      ),
-      body: topicsProvider.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-        padding: const EdgeInsets.all(AppConstants.paddingMedium),
-        child: ExpansionPanelList(
-          elevation: 2,
-          expansionCallback: (int index, bool isExpanded) {
-            setState(() {
-              _isAvailableExpanded = !_isAvailableExpanded;
-            });
-          },
-          children: [
-            _buildExpansionPanel(
-              title: 'Temas Disponíveis (${availableTopics.length})',
-              isExpanded: _isAvailableExpanded,
-              topics: availableTopics,
-              isAvailable: true,
-              userRole: userRole,
-              user: user,
-            ),
-            _buildExpansionPanel(
-              title: 'Temas Escolhidos (${chosenTopics.length})',
-              isExpanded: !_isAvailableExpanded,
-              topics: chosenTopics,
-              isAvailable: false,
-              userRole: userRole,
-              user: user,
-            ),
-          ],
-        ),
-      ),
+      appBar: AppBar(title: const Text('Escolha de Temas')),
+      body:
+          topicsProvider.isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
+                padding: const EdgeInsets.all(AppConstants.paddingMedium),
+                child: ExpansionPanelList(
+                  elevation: 2,
+                  expansionCallback: (int index, bool isExpanded) {
+                    setState(() {
+                      _isAvailableExpanded = !_isAvailableExpanded;
+                    });
+                  },
+                  children: [
+                    _buildExpansionPanel(
+                      title: 'Temas Disponíveis (${availableTopics.length})',
+                      isExpanded: _isAvailableExpanded,
+                      topics: availableTopics,
+                      isAvailable: true,
+                      userRole: userRole,
+                      user: user,
+                    ),
+                    _buildExpansionPanel(
+                      title: 'Temas Escolhidos (${chosenTopics.length})',
+                      isExpanded: !_isAvailableExpanded,
+                      topics: chosenTopics,
+                      isAvailable: false,
+                      userRole: userRole,
+                      user: user,
+                    ),
+                  ],
+                ),
+              ),
     );
   }
 
@@ -137,55 +144,52 @@ class _TopicSelectionScreenState extends State<TopicSelectionScreen> {
       backgroundColor: AppConstants.cardColor,
       canTapOnHeader: true,
       headerBuilder: (BuildContext context, bool isExpanded) {
-        return ListTile(
-          title: Text(title, style: AppConstants.heading3),
-        );
+        return ListTile(title: Text(title, style: AppConstants.heading3));
       },
-      body: topics.isEmpty
-          ? const Padding(
-        padding: EdgeInsets.all(AppConstants.paddingMedium),
-        child: Text('Nenhum tema nesta categoria.'),
-      )
-          : ListView.separated(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: topics.length,
-        separatorBuilder: (context, index) => const Divider(height: 1),
-        itemBuilder: (context, index) {
-          final topic = topics[index];
-          final canUnchoose = userRole == AppConstants.roleStudent && topic.chosenByUid == user?.uid;
+      body:
+          topics.isEmpty
+              ? const Padding(
+                padding: EdgeInsets.all(AppConstants.paddingMedium),
+                child: Text('Nenhum tema nesta categoria.'),
+              )
+              : ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: topics.length,
+                separatorBuilder: (context, index) => const Divider(height: 1),
+                itemBuilder: (context, index) {
+                  final topic = topics[index];
+                  final canUnchoose =
+                      userRole == AppConstants.roleStudent &&
+                      topic.chosenByUid == user?.uid;
 
-          return ListTile(
-            title: Text(topic.titulo),
-            subtitle: Text(
-              isAvailable ? topic.descricao : 'Escolhido por: ${topic.chosenByNickname ?? 'N/A'}',
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            trailing: userRole == AppConstants.roleStudent
-                ? (isAvailable
-                ? ElevatedButton(
-              onPressed: () => _handleChooseTopic(topic),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppConstants.primaryColor,
-                foregroundColor: Colors.white,
+                  return ListTile(
+                    title: Text(topic.titulo),
+                    subtitle: Text(
+                      isAvailable
+                          ? topic.descricao
+                          : 'Escolhido por: ${topic.chosenByNickname ?? 'N/A'}',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    trailing:
+                        userRole == AppConstants.roleStudent
+                            ? (isAvailable
+                                ? ElevatedButton(
+                                  onPressed: () => _handleChooseTopic(topic),
+                                  child: const Text('Escolher'),
+                                )
+                                : (canUnchoose
+                                    ? OutlinedButton(
+                                      onPressed:
+                                          () => _handleUnchooseTopic(topic),
+                                      child: const Text('Desmarcar'),
+                                    )
+                                    : null))
+                            : null,
+                  );
+                },
               ),
-              child: const Text('Escolher'),
-            )
-                : (canUnchoose
-                ? OutlinedButton(
-              onPressed: () => _handleUnchooseTopic(topic),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppConstants.warningColor,
-                side: const BorderSide(color: AppConstants.warningColor),
-              ),
-              child: const Text('Desmarcar'),
-            )
-                : null))
-                : null,
-          );
-        },
-      ),
       isExpanded: isExpanded,
     );
   }

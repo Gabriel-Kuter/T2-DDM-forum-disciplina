@@ -14,10 +14,12 @@ class AnnouncementDetailScreen extends StatefulWidget {
   const AnnouncementDetailScreen({super.key, required this.announcement});
 
   @override
-  State<AnnouncementDetailScreen> createState() => _AnnouncementDetailScreenState();
+  State<AnnouncementDetailScreen> createState() =>
+      _AnnouncementDetailScreenState();
 }
 
-class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen> with SingleTickerProviderStateMixin {
+class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen>
+    with SingleTickerProviderStateMixin {
   final _commentController = TextEditingController();
   final _scrollController = ScrollController();
 
@@ -29,9 +31,9 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen> wit
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context
-          .read<AnnouncementsProvider>()
-          .loadCommentsForAnnouncement(widget.announcement.id);
+      context.read<AnnouncementsProvider>().loadCommentsForAnnouncement(
+        widget.announcement.id,
+      );
     });
 
     _fabAnimationController = AnimationController(
@@ -89,30 +91,40 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen> wit
         }
       });
     } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(announcementsProvider.errorMessage ?? 'Erro ao enviar comentário.'),
-        backgroundColor: AppConstants.errorColor,
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            announcementsProvider.errorMessage ?? 'Erro ao enviar comentário.',
+          ),
+          backgroundColor: AppConstants.errorColor,
+        ),
+      );
     }
   }
 
   void _showDeleteCommentDialog(CommentModel comment) {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Apagar Comentário'),
-        content: const Text('Tem a certeza de que deseja apagar este comentário?'),
-        actions: [
-          TextButton(child: const Text('Cancelar'), onPressed: () => Navigator.of(ctx).pop()),
-          TextButton(
-            child: const Text('Apagar', style: TextStyle(color: AppConstants.errorColor)),
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              _handleDeleteComment(comment.id);
-            },
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Apagar Comentário'),
+            content: const Text(
+              'Tem a certeza de que deseja apagar este comentário?',
+            ),
+            actions: [
+              TextButton(
+                child: const Text('Cancelar'),
+                onPressed: () => Navigator.of(ctx).pop(),
+              ),
+              TextButton(
+                child: const Text('Apagar'),
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                  _handleDeleteComment(comment.id);
+                },
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -123,39 +135,56 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen> wit
       commentId: commentId,
     );
     if (!success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(provider.errorMessage ?? 'Erro ao apagar comentário.'),
-        backgroundColor: AppConstants.errorColor,
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(provider.errorMessage ?? 'Erro ao apagar comentário.'),
+          backgroundColor: AppConstants.errorColor,
+        ),
+      );
     }
   }
 
   void _showDeleteAnnouncementDialog() {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Apagar Anúncio'),
-        content: const Text('Tem a certeza de que deseja apagar este anúncio e todos os seus comentários? Esta ação é irreversível.'),
-        actions: [
-          TextButton(child: const Text('Cancelar'), onPressed: () => Navigator.of(ctx).pop()),
-          TextButton(
-            child: const Text('Apagar', style: TextStyle(color: AppConstants.errorColor)),
-            onPressed: () async {
-              Navigator.of(ctx).pop();
-              final provider = context.read<AnnouncementsProvider>();
-              final success = await provider.deleteAnnouncement(widget.announcement.id);
-              if (success && mounted) {
-                Navigator.of(context).pop();
-              } else if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text(provider.errorMessage ?? 'Erro ao apagar anúncio.'),
-                  backgroundColor: AppConstants.errorColor,
-                ));
-              }
-            },
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Apagar Anúncio'),
+            content: const Text(
+              'Tem a certeza de que deseja apagar este anúncio e todos os seus comentários? Esta ação é irreversível.',
+            ),
+            actions: [
+              TextButton(
+                child: const Text('Cancelar'),
+                onPressed: () => Navigator.of(ctx).pop(),
+              ),
+              TextButton(
+                child: const Text(
+                  'Apagar',
+                  style: TextStyle(color: AppConstants.errorColor),
+                ),
+                onPressed: () async {
+                  Navigator.of(ctx).pop();
+                  final provider = context.read<AnnouncementsProvider>();
+                  final success = await provider.deleteAnnouncement(
+                    widget.announcement.id,
+                  );
+                  if (success && mounted) {
+                    Navigator.of(context).pop();
+                  } else if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          provider.errorMessage ?? 'Erro ao apagar anúncio.',
+                        ),
+                        backgroundColor: AppConstants.errorColor,
+                      ),
+                    );
+                  }
+                },
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -163,15 +192,18 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen> wit
   Widget build(BuildContext context) {
     final announcementsProvider = context.watch<AnnouncementsProvider>();
     final authProvider = context.watch<AuthProvider>();
-    final comments = announcementsProvider.getCommentsForAnnouncement(widget.announcement.id);
+    final comments = announcementsProvider.getCommentsForAnnouncement(
+      widget.announcement.id,
+    );
     final currentUser = authProvider.user;
 
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
       appBar: AppBar(
-        title: Text(widget.announcement.titulo, overflow: TextOverflow.ellipsis),
-        backgroundColor: AppConstants.primaryColor,
-        foregroundColor: Colors.white,
+        title: Text(
+          widget.announcement.titulo,
+          overflow: TextOverflow.ellipsis,
+        ),
       ),
       body: Stack(
         children: [
@@ -183,11 +215,16 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen> wit
                   slivers: [
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.all(AppConstants.paddingLarge),
+                        padding: const EdgeInsets.all(
+                          AppConstants.paddingLarge,
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(widget.announcement.titulo, style: AppConstants.heading2),
+                            Text(
+                              widget.announcement.titulo,
+                              style: AppConstants.heading2,
+                            ),
                             const SizedBox(height: AppConstants.paddingSmall),
                             Text(
                               'Publicado em: ${DateFormat('dd/MM/yyyy \'às\' HH:mm').format(widget.announcement.dataCriacao.toDate())}',
@@ -196,7 +233,10 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen> wit
                             const Divider(height: AppConstants.paddingLarge),
                             Text(
                               widget.announcement.corpo,
-                              style: AppConstants.bodyText.copyWith(fontSize: 16, height: 1.5),
+                              style: AppConstants.bodyText.copyWith(
+                                fontSize: 16,
+                                height: 1.5,
+                              ),
                             ),
                           ],
                         ),
@@ -204,43 +244,72 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen> wit
                     ),
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(AppConstants.paddingLarge, 0, AppConstants.paddingLarge, AppConstants.paddingSmall),
-                        child: Text('Comentários (${comments.length})', style: AppConstants.heading3),
+                        padding: const EdgeInsets.fromLTRB(
+                          AppConstants.paddingLarge,
+                          0,
+                          AppConstants.paddingLarge,
+                          AppConstants.paddingSmall,
+                        ),
+                        child: Text(
+                          'Comentários (${comments.length})',
+                          style: AppConstants.heading3,
+                        ),
                       ),
                     ),
                     comments.isEmpty
                         ? const SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.all(AppConstants.paddingLarge),
-                        child: Center(child: Text('Seja o primeiro a comentar!')),
-                      ),
-                    )
-                        : SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                          final comment = comments[index];
-                          final canDelete = currentUser != null &&
-                              (currentUser.role == AppConstants.roleProfessor ||
-                                  comment.authorUid == currentUser.uid);
-                          return ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: AppConstants.primaryColor.withOpacity(0.2),
-                              child: Text(comment.authorNickname.substring(0, 1).toUpperCase()),
+                          child: Padding(
+                            padding: EdgeInsets.all(AppConstants.paddingLarge),
+                            child: Center(
+                              child: Text('Seja o primeiro a comentar!'),
                             ),
-                            title: Text(comment.authorNickname, style: const TextStyle(fontWeight: FontWeight.bold)),
-                            subtitle: Text(comment.text),
-                            trailing: canDelete
-                                ? IconButton(
-                              icon: const Icon(Icons.delete_outline, color: AppConstants.errorColor),
-                              tooltip: 'Apagar comentário',
-                              onPressed: () => _showDeleteCommentDialog(comment),
-                            )
-                                : null,
-                          );
-                        },
-                        childCount: comments.length,
-                      ),
-                    ),
+                          ),
+                        )
+                        : SliverList(
+                          delegate: SliverChildBuilderDelegate((
+                            context,
+                            index,
+                          ) {
+                            final comment = comments[index];
+                            final canDelete =
+                                currentUser != null &&
+                                (currentUser.role ==
+                                        AppConstants.roleProfessor ||
+                                    comment.authorUid == currentUser.uid);
+                            return ListTile(
+                              leading: CircleAvatar(
+                                backgroundColor: AppConstants.primaryColor
+                                    .withOpacity(0.2),
+                                child: Text(
+                                  comment.authorNickname
+                                      .substring(0, 1)
+                                      .toUpperCase(),
+                                ),
+                              ),
+                              title: Text(
+                                comment.authorNickname,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              subtitle: Text(comment.text),
+                              trailing:
+                                  canDelete
+                                      ? IconButton(
+                                        icon: const Icon(
+                                          Icons.delete_outline,
+                                          color: AppConstants.errorColor,
+                                        ),
+                                        tooltip: 'Apagar comentário',
+                                        onPressed:
+                                            () => _showDeleteCommentDialog(
+                                              comment,
+                                            ),
+                                      )
+                                      : null,
+                            );
+                          }, childCount: comments.length),
+                        ),
                     const SliverToBoxAdapter(child: SizedBox(height: 80)),
                   ],
                 ),
@@ -250,11 +319,7 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen> wit
           ),
 
           if (currentUser?.role == AppConstants.roleProfessor)
-            Positioned(
-              bottom: 120,
-              right: 16,
-              child: _buildSpeedDialFab(),
-            ),
+            Positioned(bottom: 120, right: 16, child: _buildSpeedDialFab()),
         ],
       ),
     );
@@ -286,11 +351,14 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen> wit
               heroTag: 'edit_announcement',
               onPressed: () {
                 _toggleFabMenu();
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (_) => CreateAnnouncementScreen(
-                    announcementToEdit: widget.announcement,
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder:
+                        (_) => CreateAnnouncementScreen(
+                          announcementToEdit: widget.announcement,
+                        ),
                   ),
-                ));
+                );
               },
               backgroundColor: AppConstants.warningColor,
               tooltip: 'Editar Anúncio',

@@ -46,23 +46,15 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: AppConstants.errorColor,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(AppConstants.paddingMedium),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
-        ),
-      ),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   void _navigateToSignup() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const SignupScreen()),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => const SignupScreen()));
   }
 
   @override
@@ -77,11 +69,7 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               const SizedBox(height: AppConstants.paddingXLarge),
 
-              Icon(
-                Icons.forum,
-                size: 80,
-                color: AppConstants.primaryColor,
-              ),
+              Icon(Icons.forum, size: 80, color: AppConstants.primaryColor),
               const SizedBox(height: AppConstants.paddingMedium),
 
               Text(
@@ -102,7 +90,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 color: AppConstants.cardColor,
                 elevation: 2,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
+                  borderRadius: BorderRadius.circular(
+                    AppConstants.borderRadiusLarge,
+                  ),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(AppConstants.paddingLarge),
@@ -133,7 +123,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             if (value == null || value.trim().isEmpty) {
                               return AppConstants.emailRequiredMessage;
                             }
-                            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                            if (!RegExp(
+                              r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                            ).hasMatch(value)) {
                               return AppConstants.emailInvalidMessage;
                             }
                             return null;
@@ -180,51 +172,40 @@ class _LoginScreenState extends State<LoginScreen> {
 
                         ElevatedButton(
                           onPressed: _isLoading ? null : _handleLogin,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppConstants.primaryColor,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              vertical: AppConstants.paddingMedium,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                AppConstants.borderRadiusMedium,
-                              ),
-                            ),
-                          ),
-                          child: _isLoading
-                              ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                            ),
-                          )
-                              : const Text(
-                            'Entrar',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                          child:
+                              _isLoading
+                                  ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(),
+                                  )
+                                  : const Text('Entrar'),
                         ),
 
                         const SizedBox(height: AppConstants.paddingMedium),
 
                         Row(
                           children: [
-                            Expanded(child: Divider(color: Colors.grey.shade300)),
+                            Expanded(
+                              child: Divider(
+                                color: AppConstants.textSecondaryColor
+                                    .withValues(alpha: 0.3),
+                                height: AppConstants.paddingLarge,
+                              ),
+                            ),
                             Padding(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: AppConstants.paddingMedium,
                               ),
-                              child: Text(
-                                'ou',
-                                style: AppConstants.caption,
+                              child: Text('ou', style: AppConstants.caption),
+                            ),
+                            Expanded(
+                              child: Divider(
+                                color: AppConstants.textSecondaryColor
+                                    .withValues(alpha: 0.3),
+                                height: AppConstants.paddingLarge,
                               ),
                             ),
-                            Expanded(child: Divider(color: Colors.grey.shade300)),
                           ],
                         ),
 

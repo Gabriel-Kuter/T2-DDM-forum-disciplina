@@ -42,9 +42,10 @@ class _SignupScreenState extends State<SignupScreen> {
       email: _emailController.text.trim(),
       password: _passwordController.text,
       matricula: _matriculaController.text.trim(),
-      nickname: _nicknameController.text.trim().isEmpty
-          ? null
-          : _nicknameController.text.trim(),
+      nickname:
+          _nicknameController.text.trim().isEmpty
+              ? null
+              : _nicknameController.text.trim(),
     );
 
     setState(() => _isLoading = false);
@@ -64,11 +65,6 @@ class _SignupScreenState extends State<SignupScreen> {
       SnackBar(
         content: Text(message),
         backgroundColor: AppConstants.errorColor,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(AppConstants.paddingMedium),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
-        ),
       ),
     );
   }
@@ -78,11 +74,6 @@ class _SignupScreenState extends State<SignupScreen> {
       SnackBar(
         content: Text(message),
         backgroundColor: AppConstants.successColor,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(AppConstants.paddingMedium),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
-        ),
       ),
     );
   }
@@ -114,8 +105,6 @@ class _SignupScreenState extends State<SignupScreen> {
       backgroundColor: AppConstants.backgroundColor,
       appBar: AppBar(
         title: const Text('Criar Conta'),
-        backgroundColor: AppConstants.primaryColor,
-        foregroundColor: Colors.white,
         elevation: 0,
       ),
       body: SafeArea(
@@ -149,7 +138,9 @@ class _SignupScreenState extends State<SignupScreen> {
                 color: AppConstants.cardColor,
                 elevation: 2,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
+                  borderRadius: BorderRadius.circular(
+                    AppConstants.borderRadiusLarge,
+                  ),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(AppConstants.paddingLarge),
@@ -187,7 +178,9 @@ class _SignupScreenState extends State<SignupScreen> {
                             if (value == null || value.trim().isEmpty) {
                               return AppConstants.emailRequiredMessage;
                             }
-                            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                            if (!RegExp(
+                              r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                            ).hasMatch(value)) {
                               return AppConstants.emailInvalidMessage;
                             }
                             return null;
@@ -262,7 +255,8 @@ class _SignupScreenState extends State<SignupScreen> {
                               ),
                               onPressed: () {
                                 setState(() {
-                                  _obscureConfirmPassword = !_obscureConfirmPassword;
+                                  _obscureConfirmPassword =
+                                      !_obscureConfirmPassword;
                                 });
                               },
                             ),
@@ -282,40 +276,23 @@ class _SignupScreenState extends State<SignupScreen> {
 
                         ElevatedButton(
                           onPressed: _isLoading ? null : _handleSignup,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppConstants.primaryColor,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              vertical: AppConstants.paddingMedium,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                AppConstants.borderRadiusMedium,
-                              ),
-                            ),
-                          ),
-                          child: _isLoading
-                              ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                            ),
-                          )
-                              : const Text(
-                            'Criar Conta',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                          child:
+                              _isLoading
+                                  ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(),
+                                  )
+                                  : const Text('Criar Conta'),
                         ),
 
                         const SizedBox(height: AppConstants.paddingMedium),
 
                         TextButton(
-                          onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+                          onPressed:
+                              _isLoading
+                                  ? null
+                                  : () => Navigator.of(context).pop(),
                           child: RichText(
                             text: TextSpan(
                               style: AppConstants.bodyText,

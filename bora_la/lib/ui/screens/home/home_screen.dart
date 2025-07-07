@@ -35,8 +35,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_selectedIndex == 0 ? AppConstants.appName : 'Meu Perfil'),
-        backgroundColor: AppConstants.primaryColor,
-        foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -63,6 +61,9 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: AppConstants.primaryColor,
+        unselectedItemColor: AppConstants.textSecondaryColor,
+        backgroundColor: AppConstants.cardColor,
+        type: BottomNavigationBarType.fixed,
         onTap: _onItemTapped,
       ),
       floatingActionButton: _selectedIndex == 0 && user?.role == AppConstants.roleProfessor

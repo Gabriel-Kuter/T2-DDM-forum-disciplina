@@ -10,7 +10,8 @@ class CreateAnnouncementScreen extends StatefulWidget {
   const CreateAnnouncementScreen({super.key, this.announcementToEdit});
 
   @override
-  State<CreateAnnouncementScreen> createState() => _CreateAnnouncementScreenState();
+  State<CreateAnnouncementScreen> createState() =>
+      _CreateAnnouncementScreenState();
 }
 
 class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
@@ -63,10 +64,12 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
     if (success && mounted) {
       Navigator.of(context).pop();
     } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(provider.errorMessage ?? 'Ocorreu um erro inesperado.'),
-        backgroundColor: AppConstants.errorColor,
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(provider.errorMessage ?? 'Ocorreu um erro inesperado.'),
+          backgroundColor: AppConstants.errorColor,
+        ),
+      );
     }
   }
 
@@ -75,8 +78,6 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_isEditing ? 'Editar Anúncio' : 'Novo Anúncio'),
-        backgroundColor: AppConstants.primaryColor,
-        foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppConstants.paddingLarge),
@@ -91,9 +92,11 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
                   labelText: 'Título',
                   hintText: 'Digite o título do anúncio',
                 ),
-                validator: (value) => (value == null || value.trim().isEmpty)
-                    ? 'O título é obrigatório.'
-                    : null,
+                validator:
+                    (value) =>
+                        (value == null || value.trim().isEmpty)
+                            ? 'O título é obrigatório.'
+                            : null,
                 textCapitalization: TextCapitalization.sentences,
               ),
               const SizedBox(height: AppConstants.paddingMedium),
@@ -104,26 +107,26 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
                   hintText: 'Digite o conteúdo completo do anúncio',
                 ),
                 maxLines: 10,
-                validator: (value) => (value == null || value.trim().isEmpty)
-                    ? 'O corpo do anúncio é obrigatório.'
-                    : null,
+                validator:
+                    (value) =>
+                        (value == null || value.trim().isEmpty)
+                            ? 'O corpo do anúncio é obrigatório.'
+                            : null,
                 textCapitalization: TextCapitalization.sentences,
               ),
               const SizedBox(height: AppConstants.paddingLarge),
               ElevatedButton(
                 onPressed: _isLoading ? null : _handleSubmit,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppConstants.primaryColor,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: AppConstants.paddingMedium),
-                ),
-                child: _isLoading
-                    ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
-                )
-                    : Text(_isEditing ? 'Salvar Alterações' : 'Publicar Anúncio'),
+                child:
+                    _isLoading
+                        ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(),
+                        )
+                        : Text(
+                          _isEditing ? 'Salvar Alterações' : 'Publicar Anúncio',
+                        ),
               ),
             ],
           ),

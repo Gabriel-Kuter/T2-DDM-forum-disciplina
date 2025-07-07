@@ -76,6 +76,14 @@ class AutoSeedService {
         'departamento': 'Engenharia de Software',
         'ativo': true,
       },
+      {
+        'cpf': '05612345699',
+        'nome': 'João Vitor',
+        'email': 'joaojoao@edu.udesc.br',
+        'role': 'aluno',
+        'curso': 'Engenharia de Software',
+        'ativo': true,
+      },
     ];
 
     final batch = _db.batch();

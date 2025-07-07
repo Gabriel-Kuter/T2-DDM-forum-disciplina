@@ -99,4 +99,45 @@ class FirestoreService {
     }
     return null;
   }
+
+  Future<void> deleteComment(String announcementId, String commentId) async {
+    try {
+      await _db
+          .collection('announcements')
+          .doc(announcementId)
+          .collection('comments')
+          .doc(commentId)
+          .delete();
+    } catch (e) {
+      print('Erro ao apagar comentário: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> deleteAnnouncement(String announcementId) async {
+    try {
+      await _db.collection('announcements').doc(announcementId).delete();
+    } catch (e) {
+      print('Erro ao apagar anúncio: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> createAnnouncement(Map<String, dynamic> data) async {
+    try {
+      await _db.collection('announcements').add(data);
+    } catch (e) {
+      print('Erro ao criar anúncio: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> updateAnnouncement(String id, Map<String, dynamic> data) async {
+    try {
+      await _db.collection('announcements').doc(id).update(data);
+    } catch (e) {
+      print('Erro ao atualizar anúncio: $e');
+      rethrow;
+    }
+  }
 }

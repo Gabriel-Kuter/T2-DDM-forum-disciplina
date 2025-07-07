@@ -19,7 +19,6 @@ class AuthProvider with ChangeNotifier {
   UserModel? _userModel;
   String? _errorMessage;
 
-  // Construtor
   AuthProvider(this._authService, this._firestoreService) {
     _authService.authStateChanges.listen(_onAuthStateChanged);
   }
@@ -78,14 +77,14 @@ class AuthProvider with ChangeNotifier {
         return false;
       }
 
-      // Criar Firebase Auth user
+      // Cria Firebase Auth user
       final result = await _authService.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
       if (result != null) {
-        // Criar user document no Firestore usando dados da matrícula
+        // Cria user document no Firestore usando dados da matrícula
         final userModel = UserModel(
           uid: result.user!.uid,
           email: email,
@@ -100,9 +99,16 @@ class AuthProvider with ChangeNotifier {
         return true;
       }
       return false;
-    } catch (e) {
+    } on FirebaseAuthException catch (e) {
+      //TODO exceção de usuário já criado
       _status = AuthStatus.unauthenticated;
-      _errorMessage = 'Erro ao criar conta. Tente novamente.';
+      if (e.code == 'email-already-in-use') {
+        _errorMessage = 'Este email já está cadastrado.';
+      } else if (e.code == 'weak-password') {
+        _errorMessage = 'A senha é muito fraca. Use pelo menos 6 caracteres.';
+      } else {
+        _errorMessage = 'Ocorreu um erro inesperado no cadastro.';
+      }
       notifyListeners();
       return false;
     }

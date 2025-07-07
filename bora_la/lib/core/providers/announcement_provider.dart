@@ -77,6 +77,79 @@ class AnnouncementsProvider with ChangeNotifier {
     }
   }
 
+  Future<bool> deleteComment({
+    required String announcementId,
+    required String commentId,
+  }) async {
+    try {
+      await _firestoreService.deleteComment(announcementId, commentId);
+      return true;
+    } catch (e) {
+      _errorMessage = 'Erro ao apagar comentário: $e';
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> deleteAnnouncement(String announcementId) async {
+    try {
+      await _firestoreService.deleteAnnouncement(announcementId);
+      return true;
+    } catch (e) {
+      _errorMessage = 'Erro ao apagar anúncio: $e';
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> createAnnouncement({
+    required String title,
+    required String body,
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final data = {
+        'titulo': title,
+        'corpo': body,
+        'dataCriacao': Timestamp.now(),
+      };
+      await _firestoreService.createAnnouncement(data);
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = 'Erro ao criar anúncio: $e';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> updateAnnouncement({
+    required String id,
+    required String title,
+    required String body,
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final data = {
+        'titulo': title,
+        'corpo': body,
+      };
+      await _firestoreService.updateAnnouncement(id, data);
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = 'Erro ao atualizar anúncio: $e';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   void clearError() {
     _errorMessage = null;
     notifyListeners();

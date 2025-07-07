@@ -10,6 +10,7 @@ import 'core/services/firestore_service.dart';
 import 'core/services/auto_seed_service.dart';
 
 import 'ui/screens/auth/login_screen.dart';
+import 'ui/screens/home/home_screen.dart';
 
 import 'firebase_options.dart';
 
@@ -48,12 +49,12 @@ class MyApp extends StatelessWidget {
             context.read<FirestoreService>(),
           ),
         ),
+
         ChangeNotifierProvider(
           create: (context) => AnnouncementsProvider(
             context.read<FirestoreService>(),
           ),
         ),
-        // Adicionar outros providers aqui
       ],
       child: MaterialApp(
         title: 'Fórum 65DDM',
@@ -75,18 +76,12 @@ class AuthWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
 
-    print('🔍 Auth status: ${authProvider.status}');
-    print('🔍 User: ${authProvider.user?.email ?? 'null'}');
-
     switch (authProvider.status) {
       case AuthStatus.authenticated:
-        print('✅ Showing HomeScreen');
         return const HomeScreen();
       case AuthStatus.unauthenticated:
-        print('📝 Showing LoginScreen');
         return const LoginScreen();
       default:
-        print('⏳ Showing Loading');
         return const Scaffold(
           body: Center(
             child: Column(
@@ -100,31 +95,5 @@ class AuthWrapper extends StatelessWidget {
           ),
         );
     }
-  }
-}
-
-// --- TELA DE TESTE  ---
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final userNickname = authProvider.user?.nickname ?? 'Usuário';
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Bem-vindo, $userNickname!'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              context.read<AuthProvider>().signOut();
-            },
-          ),
-        ],
-      ),
-      body: const Center(child: Text('Tela Principal (Home)')),
-    );
   }
 }

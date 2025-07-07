@@ -156,9 +156,9 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen>
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Apagar Anúncio'),
+        title: const Text('Apagar Aviso'),
         content: const Text(
-          'Tem a certeza de que deseja apagar este anúncio e todos os seus comentários? Esta ação é irreversível.',
+          'Tem a certeza de que deseja apagar este aviso e todos os seus comentários? Esta ação é irreversível.',
         ),
         actions: [
           TextButton(
@@ -171,22 +171,52 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen>
               style: TextStyle(color: AppConstants.errorColor),
             ),
             onPressed: () async {
-              Navigator.of(ctx).pop();
-              final provider = context.read<AnnouncementsProvider>();
-              final success = await provider.deleteAnnouncement(
-                announcement.id,
-              );
-              if (success && mounted) {
-                Navigator.of(context).pop();
-              } else if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      provider.errorMessage ?? 'Erro ao apagar anúncio.',
-                    ),
-                    backgroundColor: AppConstants.errorColor,
+              Navigator.of(ctx).pop(); // Fechar dialog de confirmação
+
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (ctx) => const Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16),
+                      Text(
+                        'Apagando aviso e comentários...',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ],
                   ),
-                );
+                ),
+              );
+
+              final provider = context.read<AnnouncementsProvider>();
+              final success = await provider.deleteAnnouncement(announcement.id);
+
+              if (mounted) {
+                Navigator.of(context).pop(); // Fechar loading
+
+                if (success) {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Aviso deletado com sucesso!'),
+                      backgroundColor: AppConstants.successColor,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        provider.errorMessage ?? 'Erro ao apagar aviso.',
+                      ),
+                      backgroundColor: AppConstants.errorColor,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
               }
             },
           ),
@@ -205,14 +235,14 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen>
 
     if (announcement == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Anúncio')),
+        appBar: AppBar(title: const Text('Aviso')),
         body: const Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.error_outline, size: 64, color: AppConstants.errorColor),
               SizedBox(height: 16),
-              Text('Anúncio não encontrado'),
+              Text('Aviso não encontrado'),
             ],
           ),
         ),
@@ -372,7 +402,7 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen>
                 _showDeleteAnnouncementDialog(announcement);
               },
               backgroundColor: AppConstants.errorColor,
-              tooltip: 'Apagar Anúncio',
+              tooltip: 'Apagar Aviso',
               child: const Icon(Icons.delete_forever),
             ),
           ),
@@ -392,7 +422,7 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen>
                 );
               },
               backgroundColor: AppConstants.warningColor,
-              tooltip: 'Editar Anúncio',
+              tooltip: 'Editar Aviso',
               child: const Icon(Icons.edit),
             ),
           ),

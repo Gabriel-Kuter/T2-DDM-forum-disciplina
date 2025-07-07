@@ -32,8 +32,23 @@ class AuthProvider with ChangeNotifier {
       _status = AuthStatus.unauthenticated;
       _userModel = null;
     } else {
-      _userModel = await _firestoreService.getUserData(firebaseUser.uid);
-      _status = AuthStatus.authenticated;
+      try {
+        _userModel = await _firestoreService.getUserData(firebaseUser.uid);
+
+        // Usuário existe no Auth mas não tem dados no Firestore
+        if (_userModel == null) {
+          await _authService.signOut();
+          _status = AuthStatus.unauthenticated;
+          _errorMessage = 'Dados do usuário não encontrados. Entre em contato com o suporte.';
+        } else {
+          _status = AuthStatus.authenticated;
+          _errorMessage = null;
+        }
+      } catch (e) {
+        await _authService.signOut();
+        _status = AuthStatus.unauthenticated;
+        _errorMessage = 'Erro ao carregar dados do usuário.';
+      }
     }
     notifyListeners();
   }
@@ -48,10 +63,19 @@ class AuthProvider with ChangeNotifier {
         email: email,
         password: password,
       );
-      return result != null;
+
+      if (result == null) {
+        _status = AuthStatus.unauthenticated;
+        _errorMessage = 'Email ou senha incorretos.';
+        notifyListeners();
+        return false;
+      }
+
+      return true;
+
     } catch (e) {
       _status = AuthStatus.unauthenticated;
-      _errorMessage = 'Erro ao fazer login. Verifique suas credenciais.';
+      _errorMessage = e.toString().replaceFirst('Exception: ', '');
       notifyListeners();
       return false;
     }
@@ -99,16 +123,9 @@ class AuthProvider with ChangeNotifier {
         return true;
       }
       return false;
-    } on FirebaseAuthException catch (e) {
-      //TODO exceção de usuário já criado
+    } catch (e) {
       _status = AuthStatus.unauthenticated;
-      if (e.code == 'email-already-in-use') {
-        _errorMessage = 'Este email já está cadastrado.';
-      } else if (e.code == 'weak-password') {
-        _errorMessage = 'A senha é muito fraca. Use pelo menos 6 caracteres.';
-      } else {
-        _errorMessage = 'Ocorreu um erro inesperado no cadastro.';
-      }
+      _errorMessage = e.toString().replaceFirst('Exception: ', '');
       notifyListeners();
       return false;
     }

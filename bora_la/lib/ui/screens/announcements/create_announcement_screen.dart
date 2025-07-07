@@ -77,7 +77,7 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditing ? 'Editar Anúncio' : 'Novo Anúncio'),
+        title: Text(_isEditing ? 'Editar Aviso' : 'Novo Aviso'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppConstants.paddingLarge),
@@ -90,7 +90,7 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
                 controller: _titleController,
                 decoration: AppConstants.getInputDecoration(
                   labelText: 'Título',
-                  hintText: 'Digite o título do anúncio',
+                  hintText: 'Digite o título do aviso',
                 ),
                 validator:
                     (value) =>
@@ -103,14 +103,14 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
               TextFormField(
                 controller: _bodyController,
                 decoration: AppConstants.getInputDecoration(
-                  labelText: 'Corpo do Anúncio',
-                  hintText: 'Digite o conteúdo completo do anúncio',
+                  labelText: 'Corpo do Aviso',
+                  hintText: 'Digite o conteúdo completo do aviso',
                 ),
                 maxLines: 10,
                 validator:
                     (value) =>
                         (value == null || value.trim().isEmpty)
-                            ? 'O corpo do anúncio é obrigatório.'
+                            ? 'O corpo do aviso é obrigatório.'
                             : null,
                 textCapitalization: TextCapitalization.sentences,
               ),
@@ -125,7 +125,7 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
                           child: CircularProgressIndicator(),
                         )
                         : Text(
-                          _isEditing ? 'Salvar Alterações' : 'Publicar Anúncio',
+                          _isEditing ? 'Salvar Alterações' : 'Publicar Aviso',
                         ),
               ),
             ],

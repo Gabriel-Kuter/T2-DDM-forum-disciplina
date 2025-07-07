@@ -8,10 +8,19 @@ import '../../../core/providers/auth_provider.dart';
 import '../../../core/utils/constants.dart';
 import 'create_announcement_screen.dart';
 
-class AnnouncementDetailScreen extends StatefulWidget {
-  final AnnouncementModel announcement;
+extension IterableExtension<T> on Iterable<T> {
+  T? firstWhereOrNull(bool Function(T) test) {
+    for (T element in this) {
+      if (test(element)) return element;
+    }
+    return null;
+  }
+}
 
-  const AnnouncementDetailScreen({super.key, required this.announcement});
+class AnnouncementDetailScreen extends StatefulWidget {
+  final String announcementId;
+
+  const AnnouncementDetailScreen({super.key, required this.announcementId});
 
   @override
   State<AnnouncementDetailScreen> createState() =>
@@ -32,7 +41,7 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen>
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AnnouncementsProvider>().loadCommentsForAnnouncement(
-        widget.announcement.id,
+        widget.announcementId,
       );
     });
 
@@ -65,14 +74,14 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen>
     });
   }
 
-  Future<void> _handleAddComment() async {
+  Future<void> _handleAddComment(AnnouncementModel announcement) async {
     if (_commentController.text.trim().isEmpty) return;
     final announcementsProvider = context.read<AnnouncementsProvider>();
     final user = context.read<AuthProvider>().user;
     if (user == null) return;
 
     final success = await announcementsProvider.addComment(
-      announcementId: widget.announcement.id,
+      announcementId: announcement.id,
       text: _commentController.text.trim(),
       authorUid: user.uid,
       authorNickname: user.nickname ?? user.nome,
@@ -102,36 +111,35 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen>
     }
   }
 
-  void _showDeleteCommentDialog(CommentModel comment) {
+  void _showDeleteCommentDialog(CommentModel comment, AnnouncementModel announcement) {
     showDialog(
       context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Apagar Comentário'),
-            content: const Text(
-              'Tem a certeza de que deseja apagar este comentário?',
-            ),
-            actions: [
-              TextButton(
-                child: const Text('Cancelar'),
-                onPressed: () => Navigator.of(ctx).pop(),
-              ),
-              TextButton(
-                child: const Text('Apagar'),
-                onPressed: () {
-                  Navigator.of(ctx).pop();
-                  _handleDeleteComment(comment.id);
-                },
-              ),
-            ],
+      builder: (ctx) => AlertDialog(
+        title: const Text('Apagar Comentário'),
+        content: const Text(
+          'Tem a certeza de que deseja apagar este comentário?',
+        ),
+        actions: [
+          TextButton(
+            child: const Text('Cancelar'),
+            onPressed: () => Navigator.of(ctx).pop(),
           ),
+          TextButton(
+            child: const Text('Apagar'),
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              _handleDeleteComment(comment.id, announcement);
+            },
+          ),
+        ],
+      ),
     );
   }
 
-  Future<void> _handleDeleteComment(String commentId) async {
+  Future<void> _handleDeleteComment(String commentId, AnnouncementModel announcement) async {
     final provider = context.read<AnnouncementsProvider>();
     final success = await provider.deleteComment(
-      announcementId: widget.announcement.id,
+      announcementId: announcement.id,
       commentId: commentId,
     );
     if (!success && mounted) {
@@ -144,47 +152,46 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen>
     }
   }
 
-  void _showDeleteAnnouncementDialog() {
+  void _showDeleteAnnouncementDialog(AnnouncementModel announcement) {
     showDialog(
       context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Apagar Anúncio'),
-            content: const Text(
-              'Tem a certeza de que deseja apagar este anúncio e todos os seus comentários? Esta ação é irreversível.',
-            ),
-            actions: [
-              TextButton(
-                child: const Text('Cancelar'),
-                onPressed: () => Navigator.of(ctx).pop(),
-              ),
-              TextButton(
-                child: const Text(
-                  'Apagar',
-                  style: TextStyle(color: AppConstants.errorColor),
-                ),
-                onPressed: () async {
-                  Navigator.of(ctx).pop();
-                  final provider = context.read<AnnouncementsProvider>();
-                  final success = await provider.deleteAnnouncement(
-                    widget.announcement.id,
-                  );
-                  if (success && mounted) {
-                    Navigator.of(context).pop();
-                  } else if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          provider.errorMessage ?? 'Erro ao apagar anúncio.',
-                        ),
-                        backgroundColor: AppConstants.errorColor,
-                      ),
-                    );
-                  }
-                },
-              ),
-            ],
+      builder: (ctx) => AlertDialog(
+        title: const Text('Apagar Anúncio'),
+        content: const Text(
+          'Tem a certeza de que deseja apagar este anúncio e todos os seus comentários? Esta ação é irreversível.',
+        ),
+        actions: [
+          TextButton(
+            child: const Text('Cancelar'),
+            onPressed: () => Navigator.of(ctx).pop(),
           ),
+          TextButton(
+            child: const Text(
+              'Apagar',
+              style: TextStyle(color: AppConstants.errorColor),
+            ),
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              final provider = context.read<AnnouncementsProvider>();
+              final success = await provider.deleteAnnouncement(
+                announcement.id,
+              );
+              if (success && mounted) {
+                Navigator.of(context).pop();
+              } else if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      provider.errorMessage ?? 'Erro ao apagar anúncio.',
+                    ),
+                    backgroundColor: AppConstants.errorColor,
+                  ),
+                );
+              }
+            },
+          ),
+        ],
+      ),
     );
   }
 
@@ -192,8 +199,28 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen>
   Widget build(BuildContext context) {
     final announcementsProvider = context.watch<AnnouncementsProvider>();
     final authProvider = context.watch<AuthProvider>();
+
+    final announcement = announcementsProvider.announcements
+        .firstWhereOrNull((a) => a.id == widget.announcementId);
+
+    if (announcement == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Anúncio')),
+        body: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, size: 64, color: AppConstants.errorColor),
+              SizedBox(height: 16),
+              Text('Anúncio não encontrado'),
+            ],
+          ),
+        ),
+      );
+    }
+
     final comments = announcementsProvider.getCommentsForAnnouncement(
-      widget.announcement.id,
+      announcement.id,
     );
     final currentUser = authProvider.user;
 
@@ -201,7 +228,7 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen>
       backgroundColor: AppConstants.backgroundColor,
       appBar: AppBar(
         title: Text(
-          widget.announcement.titulo,
+          announcement.titulo,
           overflow: TextOverflow.ellipsis,
         ),
       ),
@@ -222,17 +249,17 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              widget.announcement.titulo,
+                              announcement.titulo,
                               style: AppConstants.heading2,
                             ),
                             const SizedBox(height: AppConstants.paddingSmall),
                             Text(
-                              'Publicado em: ${DateFormat('dd/MM/yyyy \'às\' HH:mm').format(widget.announcement.dataCriacao.toDate())}',
+                              'Publicado em: ${DateFormat('dd/MM/yyyy \'às\' HH:mm').format(announcement.dataCriacao.toDate())}',
                               style: AppConstants.caption,
                             ),
                             const Divider(height: AppConstants.paddingLarge),
                             Text(
-                              widget.announcement.corpo,
+                              announcement.corpo,
                               style: AppConstants.bodyText.copyWith(
                                 fontSize: 16,
                                 height: 1.5,
@@ -258,74 +285,79 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen>
                     ),
                     comments.isEmpty
                         ? const SliverToBoxAdapter(
-                          child: Padding(
-                            padding: EdgeInsets.all(AppConstants.paddingLarge),
-                            child: Center(
-                              child: Text('Seja o primeiro a comentar!'),
+                      child: Padding(
+                        padding: EdgeInsets.all(AppConstants.paddingLarge),
+                        child: Center(
+                          child: Text('Seja o primeiro a comentar!'),
+                        ),
+                      ),
+                    )
+                        : SliverList(
+                      delegate: SliverChildBuilderDelegate((
+                          context,
+                          index,
+                          ) {
+                        final comment = comments[index];
+                        final canDelete =
+                            currentUser != null &&
+                                (currentUser.role ==
+                                    AppConstants.roleProfessor ||
+                                    comment.authorUid == currentUser.uid);
+                        return ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: AppConstants.primaryColor
+                                .withOpacity(0.2),
+                            child: Text(
+                              comment.authorNickname
+                                  .substring(0, 1)
+                                  .toUpperCase(),
                             ),
                           ),
-                        )
-                        : SliverList(
-                          delegate: SliverChildBuilderDelegate((
-                            context,
-                            index,
-                          ) {
-                            final comment = comments[index];
-                            final canDelete =
-                                currentUser != null &&
-                                (currentUser.role ==
-                                        AppConstants.roleProfessor ||
-                                    comment.authorUid == currentUser.uid);
-                            return ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor: AppConstants.primaryColor
-                                    .withOpacity(0.2),
-                                child: Text(
-                                  comment.authorNickname
-                                      .substring(0, 1)
-                                      .toUpperCase(),
-                                ),
-                              ),
-                              title: Text(
-                                comment.authorNickname,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              subtitle: Text(comment.text),
-                              trailing:
-                                  canDelete
-                                      ? IconButton(
-                                        icon: const Icon(
-                                          Icons.delete_outline,
-                                          color: AppConstants.errorColor,
-                                        ),
-                                        tooltip: 'Apagar comentário',
-                                        onPressed:
-                                            () => _showDeleteCommentDialog(
-                                              comment,
-                                            ),
-                                      )
-                                      : null,
-                            );
-                          }, childCount: comments.length),
-                        ),
+                          title: Text(
+                            comment.authorNickname,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          subtitle: Text(comment.text),
+                          trailing:
+                          canDelete
+                              ? IconButton(
+                            icon: const Icon(
+                              Icons.delete_outline,
+                              color: AppConstants.errorColor,
+                            ),
+                            tooltip: 'Apagar comentário',
+                            onPressed:
+                                () => _showDeleteCommentDialog(
+                              comment,
+                              announcement,
+                            ),
+                          )
+                              : null,
+                        );
+                      }, childCount: comments.length),
+                    ),
                     const SliverToBoxAdapter(child: SizedBox(height: 80)),
                   ],
                 ),
               ),
-              _buildCommentInputField(),
+              _buildCommentInputField(announcement),
             ],
           ),
 
           if (currentUser?.role == AppConstants.roleProfessor)
-            Positioned(bottom: 120, right: 16, child: _buildSpeedDialFab()),
+            Positioned(
+              bottom: 120,
+              right: 16,
+              child: _buildSpeedDialFab(announcement),
+            ),
         ],
       ),
     );
   }
 
-  Widget _buildSpeedDialFab() {
+  Widget _buildSpeedDialFab(AnnouncementModel announcement) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -337,7 +369,7 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen>
               heroTag: 'delete_announcement',
               onPressed: () {
                 _toggleFabMenu();
-                _showDeleteAnnouncementDialog();
+                _showDeleteAnnouncementDialog(announcement);
               },
               backgroundColor: AppConstants.errorColor,
               tooltip: 'Apagar Anúncio',
@@ -353,10 +385,9 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen>
                 _toggleFabMenu();
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder:
-                        (_) => CreateAnnouncementScreen(
-                          announcementToEdit: widget.announcement,
-                        ),
+                    builder: (_) => CreateAnnouncementScreen(
+                      announcementToEdit: announcement,
+                    ),
                   ),
                 );
               },
@@ -379,7 +410,7 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen>
     );
   }
 
-  Widget _buildCommentInputField() {
+  Widget _buildCommentInputField(AnnouncementModel announcement) {
     return Material(
       elevation: 8,
       child: Container(
@@ -407,7 +438,7 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen>
               IconButton(
                 icon: const Icon(Icons.send),
                 color: AppConstants.primaryColor,
-                onPressed: _handleAddComment,
+                onPressed: () => _handleAddComment(announcement),
               ),
             ],
           ),

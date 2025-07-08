@@ -8,17 +8,17 @@ class AppConstants {
   static const String roleProfessor = 'professor';
 
   // --- CORES ---
-  static const Color primaryColor = Colors.blue;
-  static const Color accentColor = Colors.blueAccent;
+  static const Color primaryColor = Color(0xFF005D3C);
+  static const Color accentColor = Color(0xFF00A859);
+  static const Color errorColor = Color(0xFFD72638);
   static const Color backgroundColor = Color(0xFFF5F5F5);
   static const Color cardColor = Colors.white;
-  static const Color textPrimaryColor = Color(0xFF212121);
+  static const Color textPrimaryColor = Color(0xFF000000);
   static const Color textSecondaryColor = Color(0xFF757575);
-  static const Color errorColor = Colors.red;
-  static const Color successColor = Colors.green;
-  static const Color warningColor = Colors.orange;
+  static const Color successColor = Color(0xFF00A859);
+  static const Color warningColor = Color(0xFFFFA000);
   static const Color dividerColor = Color(0xFFE0E0E0);
-  static const Color iconColor = Color(0xFF616161);
+  static const Color iconColor = Color(0xFF000000);
   static const Color borderColor = Color(0xFFBDBDBD);
 
   // --- PADDING ---

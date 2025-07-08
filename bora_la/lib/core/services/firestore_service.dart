@@ -53,11 +53,29 @@ class FirestoreService {
     });
   }
 
+  Future<void> addTopic(Map<String, dynamic> data) async {
+    try {
+      await _db.collection('topics').add(data);
+    } catch (e) {
+      print('Erro ao adicionar novo tema: $e');
+      rethrow;
+    }
+  }
+
   Future<void> updateTopic(String topicId, Map<String, dynamic> data) async {
     try {
       await _db.collection('topics').doc(topicId).update(data);
     } catch (e) {
-      print('Erro ao atualizar tópico: $e');
+      print('Erro ao atualizar tema: $e');
+    }
+  }
+
+  Future<void> deleteTopic(String topicId) async {
+    try {
+      await _db.collection('topics').doc(topicId).delete();
+    } catch (e) {
+      print('Erro ao apagar tema: $e');
+      rethrow;
     }
   }
 

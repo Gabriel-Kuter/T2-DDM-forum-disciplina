@@ -20,6 +20,7 @@ class TopicsProvider with ChangeNotifier {
   String? get errorMessage => _errorMessage;
 
   void _listenToTopics() {
+    _isLoading = true;
     _firestoreService.getTopics().listen(
           (topics) {
         _topics = topics;
@@ -29,11 +30,52 @@ class TopicsProvider with ChangeNotifier {
       },
       onError: (error) {
         _isLoading = false;
-        _errorMessage = 'Erro ao carregar assuntos: $error';
+        _errorMessage = 'Erro ao carregar temas: $error';
         notifyListeners();
       },
     );
   }
+
+  Future<bool> addTopic(String title, String description) async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+
+      final newTopic = TopicModel(
+        id: '', // O ID será gerado pelo Firestore
+        titulo: title,
+        descricao: description,
+      );
+
+      await _firestoreService.addTopic(newTopic.toJson());
+
+      _isLoading = false;
+      return true;
+    } catch (e) {
+      _isLoading = false;
+      _errorMessage = 'Erro ao adicionar tema: $e';
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> deleteTopic(String topicId) async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+
+      await _firestoreService.deleteTopic(topicId);
+
+      _isLoading = false;
+      return true;
+    } catch (e) {
+      _isLoading = false;
+      _errorMessage = 'Erro ao deletar tema: $e';
+      notifyListeners();
+      return false;
+    }
+  }
+
 
   Future<bool> chooseTopic(String topicId, String userUid, String userNickname) async {
     try {
@@ -50,17 +92,18 @@ class TopicsProvider with ChangeNotifier {
       return true;
     } catch (e) {
       _isLoading = false;
-      _errorMessage = 'Erro ao escolher assunto: $e';
+      _errorMessage = 'Erro ao escolher tema: $e';
       notifyListeners();
       return false;
     }
   }
 
-  Future<bool> unchooseTopic(String topicId, String userUid) async {
+  Future<bool> unchooseTopic(String topicId, String userUid, String userRole) async {
     try {
       final topic = _topics.firstWhere((t) => t.id == topicId);
-      if (topic.chosenByUid != userUid) {
-        _errorMessage = 'Você não pode desmarcar um assunto escolhido por outro aluno.';
+
+      if (userRole != 'professor' && topic.chosenByUid != userUid) {
+        _errorMessage = 'Você não pode desmarcar um tema escolhido por outro aluno.';
         notifyListeners();
         return false;
       }
@@ -78,7 +121,7 @@ class TopicsProvider with ChangeNotifier {
       return true;
     } catch (e) {
       _isLoading = false;
-      _errorMessage = 'Erro ao desmarcar assunto: $e';
+      _errorMessage = 'Erro ao desmarcar tema: $e';
       notifyListeners();
       return false;
     }

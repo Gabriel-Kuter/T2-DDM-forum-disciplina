@@ -27,7 +27,7 @@ class AutoSeedService {
     final topicsSnapshot = await _db.collection('topics').limit(1).get();
 
     if (topicsSnapshot.docs.isEmpty) {
-      print('Sem assuntos encontrados, criando assuntos iniciais...');
+      print('Sem temas encontrados, criando temas iniciais...');
       await _seedTopics();
     }
   }
@@ -155,7 +155,7 @@ class AutoSeedService {
       batch.set(docRef, topicData);
     }
     await batch.commit();
-    print('Assuntos iniciais criados com sucesso');
+    print('Temas iniciais criados com sucesso');
   }
 
   Future<void> _seedAnnouncements() async {

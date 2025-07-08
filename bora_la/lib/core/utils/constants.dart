@@ -24,7 +24,7 @@ class AppConstants {
   // --- PADDING ---
   static const double paddingSmall = 8.0;
   static const double paddingMedium = 16.0;
-  static const double paddingLarge = 24.0;
+  static const double paddingLarge = 22.0;
   static const double paddingXLarge = 32.0;
 
   // --- BORDER RADIUS ---
@@ -73,8 +73,8 @@ class AppConstants {
 
   static const String loginSuccessMessage = 'Login realizado com sucesso!';
   static const String signupSuccessMessage = 'Conta criada com sucesso!';
-  static const String topicChosenMessage = 'Tópico escolhido com sucesso!';
-  static const String topicUnchosenMessage = 'Tópico desmarcado com sucesso!';
+  static const String topicChosenMessage = 'Tema escolhido com sucesso!';
+  static const String topicUnchosenMessage = 'Tema desmarcado com sucesso!';
   static const String commentAddedMessage = 'Comentário adicionado!';
   static const String commentLabelText = 'Escreva um comentário...';
   static const String commentHintText = 'Digite sua mensagem';
@@ -193,9 +193,11 @@ class AppConstants {
         style: OutlinedButton.styleFrom(
           foregroundColor: primaryColor,
           side: const BorderSide(color: primaryColor),
-          padding: const EdgeInsets.symmetric(
-            vertical: paddingMedium,
-            horizontal: paddingLarge,
+          padding: const EdgeInsets.only(
+            left: paddingLarge/1.5,
+            right: paddingLarge/1.5,
+            top: paddingMedium/2,
+            bottom: paddingMedium/2,
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(borderRadiusMedium),

@@ -32,14 +32,14 @@ class FeedPage extends StatelessWidget {
           padding: const EdgeInsets.all(AppConstants.paddingMedium),
           children: [
             Text(
-              'Escolha seu Tema',
+              'Workshop',
               style: AppConstants.heading2.copyWith(
                 color: AppConstants.textPrimaryColor,
               ),
             ),
             const SizedBox(height: AppConstants.paddingSmall),
             Text(
-              'Selecione um dos temas abaixo para o seu trabalho.',
+              'Selecione um dos temas abaixo para o seu workshop.',
               style: AppConstants.caption,
             ),
             const SizedBox(height: AppConstants.paddingMedium),

@@ -5,6 +5,15 @@ import '../../../core/providers/auth_provider.dart';
 import '../../../core/providers/topics_provider.dart';
 import '../../../core/utils/constants.dart';
 
+/*
+ TODO:
+  - Criar FAB (FloatingActionButton) para criar novos temas;
+    Veja o FloatingActionButton da home_screen (cria avisos) para exemplo.
+    Somente o professor pode criar novos temas. (FAB visível somente para ele)
+  - Criar botão para apagar temas (somente professor).
+  - Garantir que a tela atualiza com novos temas/temas apagados ao executar as ações.
+*/
+
 class TopicSelectionScreen extends StatefulWidget {
   const TopicSelectionScreen({super.key});
 

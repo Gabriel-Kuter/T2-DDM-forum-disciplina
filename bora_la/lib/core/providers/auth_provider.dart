@@ -141,6 +141,48 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  Future<bool> updateProfile(UserModel updatedUser) async {
+    try {
+      _errorMessage = null;
+      notifyListeners();
+
+      // Salvar no Firestore
+      await _firestoreService.setUserData(updatedUser);
+
+      // Atualizar estado local (reativo)
+      _userModel = updatedUser;
+      notifyListeners();
+
+      return true;
+    } catch (e) {
+      _errorMessage = 'Erro ao atualizar perfil: $e';
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> updatePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      _errorMessage = null;
+      notifyListeners();
+
+      // Atualizar senha via AuthService
+      await _authService.updatePassword(
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+      );
+
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString().replaceFirst('Exception: ', '');
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<void> signOut() async {
     await _authService.signOut();
     _status = AuthStatus.unauthenticated;

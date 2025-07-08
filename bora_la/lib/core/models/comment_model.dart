@@ -5,6 +5,7 @@ class CommentModel {
   final String text;
   final String authorUid;
   final String authorNickname;
+  final String? authorAvatarUrl;
   final Timestamp createdAt;
 
   CommentModel({
@@ -12,6 +13,7 @@ class CommentModel {
     required this.text,
     required this.authorUid,
     required this.authorNickname,
+    this.authorAvatarUrl,
     required this.createdAt,
   });
 
@@ -20,6 +22,7 @@ class CommentModel {
       'text': text,
       'authorUid': authorUid,
       'authorNickname': authorNickname,
+      'authorAvatarUrl': authorAvatarUrl,
       'createdAt': createdAt,
     };
   }
@@ -30,6 +33,7 @@ class CommentModel {
       text: json['text'],
       authorUid: json['authorUid'],
       authorNickname: json['authorNickname'],
+      authorAvatarUrl: json['authorAvatarUrl'],
       createdAt: json['createdAt'],
     );
   }

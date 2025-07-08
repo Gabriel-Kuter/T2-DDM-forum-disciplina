@@ -85,6 +85,7 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen>
       text: _commentController.text.trim(),
       authorUid: user.uid,
       authorNickname: user.nickname ?? user.nome,
+      authorAvatarUrl: user.avatarUrl,
     );
 
     if (success) {
@@ -111,32 +112,39 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen>
     }
   }
 
-  void _showDeleteCommentDialog(CommentModel comment, AnnouncementModel announcement) {
+  void _showDeleteCommentDialog(
+    CommentModel comment,
+    AnnouncementModel announcement,
+  ) {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Apagar Comentário'),
-        content: const Text(
-          'Tem a certeza de que deseja apagar este comentário?',
-        ),
-        actions: [
-          TextButton(
-            child: const Text('Cancelar'),
-            onPressed: () => Navigator.of(ctx).pop(),
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Apagar Comentário'),
+            content: const Text(
+              'Tem a certeza de que deseja apagar este comentário?',
+            ),
+            actions: [
+              TextButton(
+                child: const Text('Cancelar'),
+                onPressed: () => Navigator.of(ctx).pop(),
+              ),
+              TextButton(
+                child: const Text('Apagar'),
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                  _handleDeleteComment(comment.id, announcement);
+                },
+              ),
+            ],
           ),
-          TextButton(
-            child: const Text('Apagar'),
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              _handleDeleteComment(comment.id, announcement);
-            },
-          ),
-        ],
-      ),
     );
   }
 
-  Future<void> _handleDeleteComment(String commentId, AnnouncementModel announcement) async {
+  Future<void> _handleDeleteComment(
+    String commentId,
+    AnnouncementModel announcement,
+  ) async {
     final provider = context.read<AnnouncementsProvider>();
     final success = await provider.deleteComment(
       announcementId: announcement.id,
@@ -155,73 +163,77 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen>
   void _showDeleteAnnouncementDialog(AnnouncementModel announcement) {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Apagar Aviso'),
-        content: const Text(
-          'Tem a certeza de que deseja apagar este aviso e todos os seus comentários? Esta ação é irreversível.',
-        ),
-        actions: [
-          TextButton(
-            child: const Text('Cancelar'),
-            onPressed: () => Navigator.of(ctx).pop(),
-          ),
-          TextButton(
-            child: const Text(
-              'Apagar',
-              style: TextStyle(color: AppConstants.errorColor),
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Apagar aviso'),
+            content: const Text(
+              'Tem a certeza de que deseja apagar este aviso e todos os seus comentários? Esta ação é irreversível.',
             ),
-            onPressed: () async {
-              Navigator.of(ctx).pop(); // Fechar dialog de confirmação
-
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (ctx) => const Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: 16),
-                      Text(
-                        'Apagando aviso e comentários...',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ],
-                  ),
+            actions: [
+              TextButton(
+                child: const Text('Cancelar'),
+                onPressed: () => Navigator.of(ctx).pop(),
+              ),
+              TextButton(
+                child: const Text(
+                  'Apagar',
+                  style: TextStyle(color: AppConstants.errorColor),
                 ),
-              );
+                onPressed: () async {
+                  Navigator.of(ctx).pop(); // Fechar dialog de confirmação
 
-              final provider = context.read<AnnouncementsProvider>();
-              final success = await provider.deleteAnnouncement(announcement.id);
-
-              if (mounted) {
-                Navigator.of(context).pop(); // Fechar loading
-
-                if (success) {
-                  Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Aviso deletado com sucesso!'),
-                      backgroundColor: AppConstants.successColor,
-                      behavior: SnackBarBehavior.floating,
-                    ),
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder:
+                        (ctx) => const Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CircularProgressIndicator(),
+                              SizedBox(height: 16),
+                              Text(
+                                'Apagando aviso e comentários...',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ],
+                          ),
+                        ),
                   );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        provider.errorMessage ?? 'Erro ao apagar aviso.',
-                      ),
-                      backgroundColor: AppConstants.errorColor,
-                      behavior: SnackBarBehavior.floating,
-                    ),
+
+                  final provider = context.read<AnnouncementsProvider>();
+                  final success = await provider.deleteAnnouncement(
+                    announcement.id,
                   );
-                }
-              }
-            },
+
+                  if (mounted) {
+                    Navigator.of(context).pop(); // Fechar loading
+
+                    if (success) {
+                      Navigator.of(context).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Aviso deletado com sucesso!'),
+                          backgroundColor: AppConstants.successColor,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            provider.errorMessage ?? 'Erro ao apagar aviso.',
+                          ),
+                          backgroundColor: AppConstants.errorColor,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  }
+                },
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -230,8 +242,9 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen>
     final announcementsProvider = context.watch<AnnouncementsProvider>();
     final authProvider = context.watch<AuthProvider>();
 
-    final announcement = announcementsProvider.announcements
-        .firstWhereOrNull((a) => a.id == widget.announcementId);
+    final announcement = announcementsProvider.announcements.firstWhereOrNull(
+      (a) => a.id == widget.announcementId,
+    );
 
     if (announcement == null) {
       return Scaffold(
@@ -240,7 +253,11 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline, size: 64, color: AppConstants.errorColor),
+              Icon(
+                Icons.error_outline,
+                size: 64,
+                color: AppConstants.errorColor,
+              ),
               SizedBox(height: 16),
               Text('Aviso não encontrado'),
             ],
@@ -315,59 +332,69 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen>
                     ),
                     comments.isEmpty
                         ? const SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.all(AppConstants.paddingLarge),
-                        child: Center(
-                          child: Text('Seja o primeiro a comentar!'),
-                        ),
-                      ),
-                    )
+                          child: Padding(
+                            padding: EdgeInsets.all(AppConstants.paddingLarge),
+                            child: Center(
+                              child: Text('Seja o primeiro a comentar!'),
+                            ),
+                          ),
+                        )
                         : SliverList(
-                      delegate: SliverChildBuilderDelegate((
-                          context,
-                          index,
+                          delegate: SliverChildBuilderDelegate((
+                            context,
+                            index,
                           ) {
-                        final comment = comments[index];
-                        final canDelete =
-                            currentUser != null &&
+                            final comment = comments[index];
+                            final canDelete =
+                                currentUser != null &&
                                 (currentUser.role ==
-                                    AppConstants.roleProfessor ||
+                                        AppConstants.roleProfessor ||
                                     comment.authorUid == currentUser.uid);
-                        return ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: AppConstants.primaryColor
-                                .withOpacity(0.2),
-                            child: Text(
-                              comment.authorNickname
-                                  .substring(0, 1)
-                                  .toUpperCase(),
-                            ),
-                          ),
-                          title: Text(
-                            comment.authorNickname,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          subtitle: Text(comment.text),
-                          trailing:
-                          canDelete
-                              ? IconButton(
-                            icon: const Icon(
-                              Icons.delete_outline,
-                              color: AppConstants.errorColor,
-                            ),
-                            tooltip: 'Apagar comentário',
-                            onPressed:
-                                () => _showDeleteCommentDialog(
-                              comment,
-                              announcement,
-                            ),
-                          )
-                              : null,
-                        );
-                      }, childCount: comments.length),
-                    ),
+                            final hasAvatar =
+                                comment.authorAvatarUrl?.isNotEmpty ?? false;
+
+                            return ListTile(
+                              leading: CircleAvatar(
+                                backgroundColor: AppConstants.primaryColor
+                                    .withOpacity(0.2),
+                                backgroundImage:
+                                    hasAvatar
+                                        ? NetworkImage(comment.authorAvatarUrl!)
+                                        : null,
+                                child:
+                                    hasAvatar
+                                        ? null
+                                        : Text(
+                                          comment.authorNickname
+                                              .substring(0, 1)
+                                              .toUpperCase(),
+                                        ),
+                              ),
+                              title: Text(
+                                comment.authorNickname,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              subtitle: Text(comment.text),
+                              trailing:
+                                  canDelete
+                                      ? IconButton(
+                                        icon: const Icon(
+                                          Icons.delete_outline,
+                                          color: AppConstants.errorColor,
+                                        ),
+                                        tooltip: 'Apagar comentário',
+                                        onPressed:
+                                            () => _showDeleteCommentDialog(
+                                              comment,
+                                              announcement,
+                                            ),
+                                      )
+                                      : null,
+                            );
+                          }, childCount: comments.length),
+                        ),
                     const SliverToBoxAdapter(child: SizedBox(height: 80)),
                   ],
                 ),
@@ -402,7 +429,7 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen>
                 _showDeleteAnnouncementDialog(announcement);
               },
               backgroundColor: AppConstants.errorColor,
-              tooltip: 'Apagar Aviso',
+              tooltip: 'Apagar aviso',
               child: const Icon(Icons.delete_forever),
             ),
           ),
@@ -415,14 +442,16 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen>
                 _toggleFabMenu();
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => CreateAnnouncementScreen(
-                      announcementToEdit: announcement,
-                    ),
+                    builder:
+                        (_) => CreateAnnouncementScreen(
+                          announcementToEdit:
+                              announcement,
+                        ),
                   ),
                 );
               },
               backgroundColor: AppConstants.warningColor,
-              tooltip: 'Editar Aviso',
+              tooltip: 'Editar aviso',
               child: const Icon(Icons.edit),
             ),
           ),

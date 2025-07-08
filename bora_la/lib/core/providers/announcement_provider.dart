@@ -58,6 +58,7 @@ class AnnouncementsProvider with ChangeNotifier {
     required String text,
     required String authorUid,
     required String authorNickname,
+    String? authorAvatarUrl,
   }) async {
     try {
       final comment = CommentModel(
@@ -65,6 +66,7 @@ class AnnouncementsProvider with ChangeNotifier {
         text: text,
         authorUid: authorUid,
         authorNickname: authorNickname,
+        authorAvatarUrl: authorAvatarUrl,
         createdAt: Timestamp.now(),
       );
 
